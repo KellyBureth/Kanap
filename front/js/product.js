@@ -115,13 +115,13 @@ addButton.addEventListener('click',function(event){
         if(amount > 1){
             newParagraphAddProduct.style.display = 'none';
         newParagraphAddProduct.innerHTML = "Vous venez d'ajouter " + amount + " Kanaps ! <p><a href='cart.html'><strong>Voir mon panier </strong></a></p>";
-    }
-    newParagraphColor.style.display = 'none';
-    newParagraphQuantity.style.display = 'none';
-    newParagraphAddProduct.style.textAlign = 'center';
-    setTimeout(() => {
-        newParagraphAddProduct.style.display = 'initial';
-    }, 400);
+        }
+        newParagraphColor.style.display = 'none';
+        newParagraphQuantity.style.display = 'none';
+        newParagraphAddProduct.style.textAlign = 'center';
+        setTimeout(() => {
+            newParagraphAddProduct.style.display = 'initial';
+        }, 400);
     
 
         if(localStorage.length < 1){

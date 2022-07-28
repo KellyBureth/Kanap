@@ -8,316 +8,171 @@ let priceProduct = '';
 let amount ='';
 
 let recup = JSON.parse(localStorage.getItem("product"));
+const reducer = (accumulator, currentValue) => accumulator + currentValue;
+
+function cartQuantity(){  //total quantité
+  let quantitiesArray = [];
+  for(let eachQuantity of recup){
+      let eachQuantityLS = parseInt(eachQuantity.quantity);
+      quantitiesArray.push(eachQuantityLS);
+  }
+  const totalQuantity = quantitiesArray.reduce(reducer, 0);
+  const displayTotalQuantity = document.getElementById('totalQuantity');
+  displayTotalQuantity.innerHTML = totalQuantity;
+}
+cartQuantity();
+
+function cartPrice(){
+let priceArray = [];
+const asyncForPrice = recup.map(async (elt) => {
+  const productID = elt.id;
+  const apiPrice = await fetch('http://localhost:3000/api/products/' + productID).then(res => res.json());
+  const productPrice = await apiPrice.price;
+  const pricePerKanap = productPrice * elt.quantity; //ok
+  priceArray.push(pricePerKanap);
+  const totalPrice = await priceArray.reduce(reducer, 0);
+  const displayTotalPrice = document.getElementById('totalPrice');
+  displayTotalPrice.innerHTML = totalPrice;
+})
+}
+cartPrice();
+
+function removeFromBasket(product){ //supprime l'article du panier
+  recup = recup.filter(function (elt) {return elt.color != product.dataset.color || elt.id != product.id} ); 
+  localStorage.setItem("product", JSON.stringify(recup)); //enregistre le nouveau panier
+}
+
 
 for(let elt of recup){ //doit rester ouvert pour utiliser element du LS
   id = elt.id;
-  //si je ferme ici : 1 seul produit, le dernier, si je ferme tout en bas, le dernier produit ajouté dupliqué 3 fois (car 3 id != ds le panier actuel). d'ailleur je ne peux pas fermer car la suite du code a besoin de id qui vaut l'id des produits selectionnés
-
+  
+  
   fetch("http://localhost:3000/api/products/")
   .then(res => res.json())
-  .then(data => { // doit rester ouvert pour recuperer element de l'API (image kanap par ex)
+  .then(data => { 
     for (let i of data){
       if(elt.id == i._id){
       imgSrc = i.imageUrl;
       imgAlt = i.altTxt;
       nameProduct = i.name;
       priceProduct = i.price;
-      //console.log(i)
       }
     }
-  
     amount = elt.quantity;
     colorProduct = elt.color;
-    const section = document.getElementById('cart__items');
-
-    const article = document.createElement('article');
-    article.classList.add('cart__item');
     article.setAttribute('id', elt.id);
-    //article.setAttribute('data-color', elt.color);
     article.dataset.color = elt.color;
-    section.appendChild(article);
-
-    const divImg = document.createElement('div');
-    divImg.classList.add('cart__item__img');
-    article.appendChild(divImg);
-
-    const image = document.createElement('img');
     image.setAttribute('src', imgSrc);
     image.setAttribute('alt', imgAlt);
-    divImg.appendChild(image);
-
-
-    const divCart = document.createElement('div');
-    divImg.classList.add('cart__item__content');
-    article.appendChild(divCart);
-
-    const divDescription = document.createElement('div');
-    divDescription.classList.add('cart__item__content__description');
-    divCart.appendChild(divDescription);
-
-    const title = document.createElement('h2');
     title.innerHTML = nameProduct;
-    divDescription.appendChild(title);
-
-    const paragrapheColor = document.createElement('p');
     paragrapheColor.innerHTML = colorProduct;
-    divDescription.appendChild(paragrapheColor);
-
-    const paragraphePrice = document.createElement('p');
     paragraphePrice.innerHTML = priceProduct + ' €';
-    divDescription.appendChild(paragraphePrice);
-
-    const divSettings = document.createElement('div');
-    divSettings.classList.add('cart__item__content__settings');
-    divCart.appendChild(divSettings);
-
-    const divAmount = document.createElement('div');
-    divAmount.classList.add('cart__item__content__settings__quantity');
-    divSettings.appendChild(divAmount);
-
-    const paragrapheAmount = document.createElement('p');
-    paragrapheAmount.innerHTML = 'Qte : ';
-    divAmount.appendChild(paragrapheAmount);
-
-    const inputAmount = document.createElement('input');
-    inputAmount.setAttribute('type', 'number');
-    inputAmount.classList.add('itemQuantity');
-    inputAmount.setAttribute('name', 'itemQuantity');
-    inputAmount.setAttribute('min', '1');
-    inputAmount.setAttribute('max', '100');
     inputAmount.value = amount;
-    divAmount.appendChild(inputAmount);
+  })
 
 
+  const section = document.getElementById('cart__items');
+  const article = document.createElement('article');
+  article.classList.add('cart__item');
+  section.appendChild(article);
 
-    const newParagraphQuantityNull = document.createElement('p');
-    divSettings.appendChild(newParagraphQuantityNull);
-    newParagraphQuantityNull.style.color = ' var(--footer-secondary-color)';
-    newParagraphQuantityNull.style.display = 'none';
-
-    const btnQuantities = document.querySelectorAll('input.itemQuantity');
-    const valeurMin = 0.9;
-    const valeurMax = 100;
-
-    
-    const reducer = (accumulator, currentValue) => accumulator + currentValue;
-
-    function cartQuantity(){  //total quantité
-        let quantitiesArray = [];
-        let priceArray = [];
-        for(let eachQuantity of recup){
-            let eachQuantityLS = Number(eachQuantity.quantity);
-            quantitiesArray.push(eachQuantityLS);
-
-                    //pour total prix
-                    let pricePerKanap = eachQuantityLS * parseInt(paragraphePrice.innerHTML); 
-                    console.log(parseInt(paragraphePrice.innerHTML));
-                    console.log(pricePerKanap);
-                    priceArray.push(pricePerKanap);
-                    console.log(priceArray);
-
-        }
-        const totalQuantity = quantitiesArray.reduce(reducer, 0);
-        console.log(totalQuantity);
-        const displayTotalQuantity = document.getElementById('totalQuantity');
-        displayTotalQuantity.innerHTML = totalQuantity;
-
-        const totalPrice = priceArray.reduce(reducer, 0);
-        console.log(totalPrice);
-        const displayTotalPrice = document.getElementById('totalPrice');
-        displayTotalPrice.innerHTML = totalPrice;
-
-    }
-
-    cartQuantity();
+  const divImg = document.createElement('div');
+  divImg.classList.add('cart__item__img');
+  article.appendChild(divImg);
+  const image = document.createElement('img');
+  divImg.appendChild(image);
 
 
-/*    let closestQuant = inputAmount.closest('article');
-                    let closestParagraphePrice = paragraphePrice.closest('article');
-                    let pricePerKanap = parseInt(closestQuant.innerHTML) * parseInt(closestParagraphePrice.innerHTML); 
-                    
-                    
-                    
-                    
-                    
-                    
-                    let prixTableau = [];
-if(elt.id === data._id){
-let prixParKanap = parseInt(data.price * elt.quantity);
-console.log(prixParKanap);
-prixTableau.push(prixParKanap);
-}
-const prixTotal = prixTableau.reduce(reducer, 0);
-console.log(prixTotal);
-*/
+  const divCart = document.createElement('div');
+  divImg.classList.add('cart__item__content');
+  article.appendChild(divCart);
 
+  const divDescription = document.createElement('div');
+  divDescription.classList.add('cart__item__content__description');
+  divCart.appendChild(divDescription);
+  const title = document.createElement('h2');
+  divDescription.appendChild(title);
+  const paragrapheColor = document.createElement('p');
+  divDescription.appendChild(paragrapheColor);
+  const paragraphePrice = document.createElement('p');
+  divDescription.appendChild(paragraphePrice);
 
+  const divSettings = document.createElement('div');
+  divSettings.classList.add('cart__item__content__settings');
+  divCart.appendChild(divSettings);
 
-  /*  function cartPrice(){  //total prix
-        
-        let priceArray = [];
-        //let lsId = Number(elt.id);
-        //let dataId = Number(data._id);
-        //console.log(lsId);
-        //console.log(dataId);
-        //if(lsId == dataId){ 
-        const allArticles = document.querySelectorAll('article.cart__item');
-        //const btnQuantity = document.querySelector('input.itemQuantity');
-        
-            let prixTableau = [];
-            if(elt.id === article.id){
-        for(let eachArticle of allArticles){
-                let prixUnitaire = document.querySelector(eachArticle > divCart > divDescription > paragraphePrice);
-                //let prixUnitaireInner = prixUnitaire.innerHTML;
-                console.log(prixUnitaire);
-            let prixParKanap = parseInt(prixUnitaire * elt.quantity);
-            console.log(prixParKanap);
-            prixTableau.push(prixParKanap);
-            }
-            const prixTotal = prixTableau.reduce(reducer, 0);
-            console.log(prixTotal);
+  const divAmount = document.createElement('div');
+  divAmount.classList.add('cart__item__content__settings__quantity');
+  divSettings.appendChild(divAmount);
 
-/*
+  const paragrapheAmount = document.createElement('p');
+  paragrapheAmount.innerHTML = 'Qte : ';
+  divAmount.appendChild(paragrapheAmount);
 
-        const eachPrice = Number(paragraphePrice.innerHTML);
-        const eachQuantity = Number(inputAmount.innerHTML);
-        console.log(eachPrice);
-        console.log(eachQuantity);
-            const totalPricePerKanap = Number(eachPrice) * Number(eachQuantity);
-            priceArray.push(totalPricePerKanap);
+  const inputAmount = document.createElement('input');
+  inputAmount.setAttribute('type', 'number');
+  inputAmount.classList.add('itemQuantity');
+  inputAmount.setAttribute('name', 'itemQuantity');
+  inputAmount.setAttribute('min', '1');
+  inputAmount.setAttribute('max', '100');
+  divAmount.appendChild(inputAmount);
 
-            */
-       // }
-        //const reducer = (accumulator, currentValue) => accumulator + currentValue;
-        //const totalPrice = priceArray.reduce(reducer, 0);
-        //console.log(totalPrice);
+  const newParagraphQuantityNull = document.createElement('p');
+  divSettings.appendChild(newParagraphQuantityNull);
+  newParagraphQuantityNull.style.color = ' var(--footer-secondary-color)';
+  newParagraphQuantityNull.style.display = 'none';
 
+  const btnQuantities = document.querySelectorAll('input.itemQuantity');
+  const valeurMin = 0.9;
+  const valeurMax = 100;
 
-        
-        //const displayTotalPrice = document.getElementById('totalPrice');
-        //displayTotalPrice.innerHTML = totalPrice;*/
-
-        /*for(let eachArticle of allArticles){
-            let nearPrice = btnQuantity.closest(allArticles);
-            let eachPrice = btnQuantity.innerHTML;
-            console.log(eachPrice);
-            let eachPriceLS = Number(eachPrice)* LSquantity;
-            priceArray.push(eachPriceLS);
-        }*/
-        /*for(let btnQuantity of btnQuantities){
-            let eachPrice = btnQuantity.innerHTML;
-            console.log(eachPrice);
-            let eachPriceLS = Number(eachPrice)* LSquantity;
-            priceArray.push(eachPriceLS);
-        }*/
-       // }
-
-       /*
-        const reducer = (accumulator, currentValue) => accumulator + currentValue;
-        const totalPrice = priceArray.reduce(reducer, 0);
-        console.log(totalPrice);*/
-
-    //}
-      //  cartPrice();*/
-    
-   /* function cartPrice(){  //total prix
-        let priceArray = [];
-        let lsId = Number(elt.id);
-        let dataId = Number(data._id);
-        console.log(lsId);
-        console.log(dataId);
-        if(lsId == dataId){ 
-        for(let eachPrice of data){
-            let eachPriceLS = Number(eachPrice.price)* LSquantity;
-            priceArray.push(eachPriceLS);
-        }
-        }
-        const reducer = (accumulator, currentValue) => accumulator + currentValue;
-        const totalPrice = priceArray.reduce(reducer, 0);
-        console.log(totalPrice);
-
-        const displayTotalPrice = document.getElementById('totalPrice');
-        displayTotalPrice.innerHTML = totalPrice;
-    }
-
-    cartPrice();*/
-
-
-
-
-    for(let btnQuantity of btnQuantities){
-      //const valeur = Number(btnQuantity.value);
-
-      if(btnQuantity.value == elt.quantity ){
-        btnQuantity.onchange = () => {
-        elt.quantity = btnQuantity.value;
-        localStorage.setItem("product", JSON.stringify(recup));
-        cartQuantity();
-        }
+  for(let btnQuantity of btnQuantities){
+    if(btnQuantity.value == elt.quantity ){
+      btnQuantity.onchange = () => {
+      elt.quantity = btnQuantity.value;
+      localStorage.setItem("product", JSON.stringify(recup));
+      cartQuantity();
+      cartPrice();
       }
-
-      btnQuantity.addEventListener('input', function(){
-        if(btnQuantity.value > valeurMax ){
-          newParagraphQuantityNull.style.display = 'none';
-          newParagraphQuantityNull.innerHTML = 'La quantité maximale autorisée est de  100 Kanaps';
-          newParagraphQuantityNull.style.display = 'table-caption';
-        }
-     
-        if(btnQuantity.value < valeurMin){
-          newParagraphQuantityNull.style.display = 'none';
-          newParagraphQuantityNull.innerHTML = 'La quantité minimale autorisée est de 1 Kanap';
-          newParagraphQuantityNull.style.display = 'table-caption';
-        }
-        
-        if(btnQuantity.value > valeurMin && btnQuantity.value < valeurMax){
-          newParagraphQuantityNull.style.display = 'none';
-          localStorage.setItem("product", JSON.stringify(recup));
-        }
-
-
-
-
-      }) //fin ecoute btnQuantity.addEventListener('input', function(){ l118
- 
-    } //fin boucle for(let btnQuantity of btnQuantities) l116
-
-
-
-
-    
-    const divDelete = document.createElement('div');
-    divDelete.classList.add('cart__item__content__settings__delete');
-    divSettings.appendChild(divDelete);
-
-    const newParagrapheDelete = document.createElement('p');
-    newParagrapheDelete.classList.add('deleteItem');
-    newParagrapheDelete.innerHTML = 'Supprimer';
-    divDelete.appendChild(newParagrapheDelete);
- 
-    let deleteButtons = document.querySelectorAll('p.deleteItem');
-
-    function removeFromBasket(product){ //supprime l'article du panier
-        recup = recup.filter(function (elt) {return elt.color != product.dataset.color || elt.id != product.id} ); 
-        //recup = recup.filter(elt => {return elt.color != product.dataset.color && elt.id != product.id} ); //conserve dans le panier uniquement les produits dont l'id n'est pas l'id du produit sur lequel l'user a cliqué, ainsi l'id selectionné sera supprimé (elt étant un element de recup,ici c'est un argument)
-        console.log(recup);
-        console.log(recup.filter);
-        console.log(elt.color);
-        console.log(elt.id);
-        console.log(product.dataset.color);
-        console.log(product.id);
-        localStorage.setItem("product", JSON.stringify(recup)); //enregistre le nouveau panier
-        console.log(recup);
     }
 
+    btnQuantity.addEventListener('input', function(){
+      if(btnQuantity.value > valeurMax ){
+        newParagraphQuantityNull.style.display = 'none';
+        newParagraphQuantityNull.innerHTML = 'La quantité maximale autorisée est de 100 Kanaps';
+        newParagraphQuantityNull.style.display = 'table-caption';
+      }
+  
+      if(btnQuantity.value < valeurMin){
+        newParagraphQuantityNull.style.display = 'none';
+        newParagraphQuantityNull.innerHTML = 'La quantité minimale autorisée est de 1 Kanap';
+        newParagraphQuantityNull.style.display = 'table-caption';
+      }
+      
+      if(btnQuantity.value > valeurMin && btnQuantity.value < valeurMax){
+        newParagraphQuantityNull.style.display = 'none';
+        localStorage.setItem("product", JSON.stringify(recup));
+      }
+    }) //fin ecoute btnQuantity.addEventListener('input', function(){ l118
+  } //fin boucle for(let btnQuantity of btnQuantities) l116
+  
+  const divDelete = document.createElement('div');
+  divDelete.classList.add('cart__item__content__settings__delete');
+  divSettings.appendChild(divDelete);
+  const newParagrapheDelete = document.createElement('p');
+  newParagrapheDelete.classList.add('deleteItem');
+  newParagrapheDelete.innerHTML = 'Supprimer';
+  divDelete.appendChild(newParagrapheDelete);
 
-    for(let deleteButton of deleteButtons){   //pour chaque btn supprimer
+  let deleteButtons = document.querySelectorAll('p.deleteItem');
+  for(let deleteButton of deleteButtons){   //pour chaque btn supprimer
       let deleteClosestProduct = deleteButton.closest('article');
       //let articleColor = deleteClosestProduct.dataset.color;
       //  let articleColor = article.getAttribute('data-color');
       deleteButton.addEventListener('click', function(){
           removeFromBasket(deleteClosestProduct);
           cartQuantity();
-          console.log(removeFromBasket);
+          cartPrice();
         if(elt.id == deleteClosestProduct.id && elt.color == deleteClosestProduct.dataset.color){
           deleteClosestProduct.remove();//supprime article de la page
           //const deleteElt = recup.filter(p => p.id != deleteClosestProduct.id && p.color != deleteClosestProduct.dataset.color); 
@@ -326,23 +181,275 @@ console.log(prixTotal);
           localStorage.setItem("product", JSON.stringify(recup)); //enregistre le nouveau panier
         }
       }) //fin ecoute deleteButton.addEventListener('click', function(){ l.150
-    }//fin for(let deleteButton of deleteButtons){ l.147
-
-
-
-
-
-
-
-})
-    
-        
-
-
-
-    
+  }//fin for(let deleteButton of deleteButtons){ l.147
 
 }
+
+
+
+//formulaire
+
+const firstName = document.getElementById('firstName');
+const lastName = document.getElementById('lastName');
+const address = document.getElementById('address');
+const city = document.getElementById('city');
+const email = document.getElementById('email');
+const firstNameErrorMsg = document.getElementById('firstNameErrorMsg');
+const lastNameErrorMsg = document.getElementById('lastNameErrorMsg');
+const addressErrorMsg = document.getElementById('addressErrorMsg');
+const cityErrorMsg = document.getElementById('cityErrorMsg');
+const emailErrorMsg = document.getElementById('emailErrorMsg');
+
+
+
+let contact = {
+  firstName : '',
+  lastName : '',
+  address : '',
+  city : '',
+  email : ''
+}
+
+
+const btnOrder = document.getElementById('order');
+
+firstName.addEventListener('change', function(event){
+  const firstNameValue = event.target.value;
+  if(/^[a-z ,.'-]+$/.test(firstNameValue)){
+    contact.firstName = firstNameValue;
+    firstNameErrorMsg.innerHTML = '';
+  }
+  else {
+    firstNameErrorMsg.innerHTML = "Veuillez entrer votre prénom";
+    //btnOrder.disabled = true;
+  }
+})
+
+
+lastName.addEventListener('change', function(event){
+  const lastNameValue = event.target.value;
+  if(/^[a-z ,.'-]+$/.test(lastNameValue)){
+    contact.lastName = lastNameValue;
+    lastNameErrorMsg.innerHTML = '';
+  }
+  else {
+    lastNameErrorMsg.innerHTML = "Veuillez entrer votre nom de famille";
+    //btnOrder.disabled = true;
+  }
+})
+
+address.addEventListener('change', function(event){
+  const addressValue = event.target.value;
+  if(/^[#.0-9a-zA-Z\s,-]+$/.test(addressValue)){
+    contact.address = addressValue;
+    addressErrorMsg.innerHTML = '';
+  }
+  else {
+    addressErrorMsg.innerHTML = "Veuillez entrer une adresse valide";
+   // btnOrder.disabled = true;
+  }
+})
+
+city.addEventListener('change', function(event){
+  const cityValue = event.target.value;
+  if(/^[a-z ,.'-]+$/.test(cityValue)){
+    contact.city = cityValue;
+    cityErrorMsg.innerHTML = '';
+  }
+  else {
+    cityErrorMsg.innerHTML = "Veuillez entrer un nom de ville valide";
+    //btnOrder.disabled = true;
+  }
+})
+
+email.addEventListener('change', function(event){
+  const emailValue = event.target.value;
+  if(/^[a-zA-Z0-9.!#$%&'*+=?^_`{|}~-]+[@]+[a-zA-Z]+[.]+[a-zA-Z]+$/.test(emailValue)){
+    contact.email = emailValue;
+    emailErrorMsg.innerHTML = '';
+  }
+  else {
+    emailErrorMsg.innerHTML = "Veuillez entrer une adresse mail valide";
+  }
+})
+
+let productArray = []; //recuperer produit du panier 
+for(let elt of recup){
+  const productId = elt.id;
+  productArray.push(productId);
+}
+
+const formContact = document.querySelector('form.cart__order__form');
+btnOrder.addEventListener('click', function(e){
+  e.preventDefault();
+
+const postContactAndProduct = fetch("http://localhost:3000/api/products/order", { //const promise01
+  method : "POST",
+  headers : {"Content-type" : "application/json"},
+  body :  JSON.stringify({contact : contact, products : productArray}) //contact+array =aenvoyer
+  })
+  console.log(contact);
+  console.log(productArray);
+  
+  postContactAndProduct.then(async(response) =>{
+  
+
+    try{
+  console.log('response', response);
+  const contenu = await response.json();
+  console.log(contenu.orderId);
+  location.href = 'confirmation.html?orderId=' + contenu.orderId;
+  //formContact.action = "confirmation.html/" + await contenu.orderId;
+  //console.log(btnOrder.action);
+     // + await contenu.orderId
+    } catch(e){
+      console.log(e);
+    }
+
+})
+})
+
+
+
+
+/*
+
+btnOrder.addEventListener('click', function(e){
+  e.preventDefault();
+
+async function getOrderId(){
+  order =  await fetch("http://localhost:3000/api/products/order", {
+  method : "POST",
+  headers : {"Content-type" : "application/json"},
+  body :  JSON.stringify({contact : contact, products : productArray})
+  })
+  console.log(contact);
+  console.log(productArray);
+}
+getOrderId();
+console.log('order', order);
+console.log('orderid', order.id);
+recup.setItem('orderId', order.id);
+});
+*/
+
+
+
+//const apiPrice = await fetch('http://localhost:3000/api/products/' + productID).then(res => res.json());
+  /*ok
+  btnOrder.addEventListener('click', function(e){
+  e.preventDefault();
+
+fetch("http://localhost:3000/api/products/order", {
+  method : "POST",
+  headers : {"Content-type" : "application/json"},
+  body :  JSON.stringify({contact : contact, products : productArray})
+  })
+  console.log(contact);
+  console.log(productArray);
+})
+
+
+
+
+
+
+essai
+
+btnOrder.addEventListener('click', function(e){
+  e.preventDefault();
+
+async function getOrderId(){
+  order =  await fetch("http://localhost:3000/api/products/order", {
+  method : "POST",
+  headers : {"Content-type" : "application/json"},
+  body :  JSON.stringify({contact : contact, products : productArray})
+  })
+  console.log(contact);
+  console.log(productArray);
+}
+getOrderId();
+console.log('order', order);
+console.log('orderid', order.id);
+recup.setItem('orderId', order.id);
+});
+
+
+fetch("http://localhost:3000/api/products/order")
+  .then(res => res.json())
+  .then(data => { console.log(data);})
+  .catch(err => console.log(err))
+
+  .then(res => res.json())
+  .then(data => {
+  })
+*/
+
+/*
+function forms(inputs){
+  inputs.addEventListener('change', function(event){
+    let champs = event.innerHTML;
+let objectForm = {
+  firstName : forms(firstName),
+  lastName : forms(lastName),
+  address : forms(address),
+  city : forms(city),
+  email : forms(email)
+}; //données formulaire
+
+console.log(objectForm);
+  })
+
+  forms(firstName);
+  forms(lastName);
+  forms(address);
+  forms(city);
+  forms(email);
+}
+*/
+
+
+//regex pr nom prenom ville [a-zA-Z]
+//regex pr adresse [a-zA-Z0-9]
+//regex pr email [a-zA-Z0-9.!#$%&'*+=?^_`{|}~-]+[@]+[a-zA-Z]+[.]+[a-zA-Z]+
+//localStorage.setItem("contact", JSON.stringify(objectForm, productArray)); // possible de POST array et objet en mm tps ?
+/*
+fetch("http://localhost:3000/api/products/", {
+  method : "POST",
+  header : {
+    "Accept" : "application/json"
+  },
+  body : { contact : objectForm, tableau : productArray
+  }
+  })
+  .then(res => res.json())
+  .then(data => {
+  })
+
+
+
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -367,96 +474,3 @@ console.log(prixTotal);
 // ">totalQuantity</p>
 // <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" style="font-size: xx-small;"><path d="M592 224C565.5 224 544 245.5 544 272V352H96V272C96 245.5 74.51 224 48 224S0 245.5 0 272v192C0 472.8 7.164 480 16 480h64c8.836 0 15.1-7.164 15.1-16L96 448h448v16c0 8.836 7.164 16 16 16h64c8.836 0 16-7.164 16-16v-192C640 245.5 618.5 224 592 224zM128 272V320h384V272c0-38.63 27.53-70.95 64-78.38V160c0-70.69-57.31-128-128-128H191.1c-70.69 0-128 57.31-128 128L64 193.6C100.5 201.1 128 233.4 128 272z"></path></svg> 
 
-
-
-          //const eltClosest = elt.colsest();
-       /*if(elt.id === deleteClosestProduct.id && paragrapheColor.innerHTML === elt.color ){
-          //elt.quantity = 0;
-          removeFromBasket(elt); //seul pbm : ca supp le mm id mm ac color !=
-          //recup.pop(elt); //supprime dernier article de la liste
-          //elt.remove(); //error "elt.remove is not a function athtmlparageraphelement anonymous"
-          localStorage.setItem("product", JSON.stringify(recup));
-        
-          //removeFromBasket(elt);
-          //elt.remove();
-           //enregistre le nouveau panier
-          /*for(let kanap of recup){
-          let kanapQuantity = kanap.quantity;
-          if(kanapQuantity < 1 ){
-          removeFromBasket(kanap);
-          //kanap.remove();
-          //recup.pop(kanap);
-          //alert('essai');
-          localStorage.setItem("product", JSON.stringify(recup));
-          }
-          }*/
-        //fin if(elt.id == deleteClosestProduct.id && elt.color == articleColor l.153
-        //recup.id = elt.id
-        //article doit avoir id et color pour effacer le bon via ls ! 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-cartDisplay();
-const removeProduct = async (cartDisplay) => {
-    await cartDisplay;
-    let deleteProduct = document.querySelectorAll('.deleteItem');
-
-
-    deleteProduct.forEach((productToDelete) => {
-        productToDelete.addEventListener('click', () => {
-            console.log(deleteProduct);
-            //const btnDelete = deleteProduct.closest(deleteProduct);
-            //removeFromBasket(btnDelete);
-        });
-    });
-}*/
-
-
-/*const deleteProduct = document.querySelector('.deleteItem');
-
-function removeFromBasket(product){ //supprime l'article du panier
-    recup = recup.filter(p => p.id != product.id); //conserve dans le panier uniquement les produits dont l'id n'est pas l'id du produit sur lequel l'user a cliqué, ainsi l'id selectionné sera supprimé
-    
-    localStorage.setItem("product", JSON.stringify(recup)); //enregistre le nouveau panier
-}*/
-
-
-/*deleteProduct.addEventListener('click',function(){
-    const btnDelete = deleteProduct.closest(deleteProduct);
-    removeFromBasket(btnDelete);
-})*/
-
-/*
-function removeFromBasket(product){ //supprime l'article du panier
-    recup = recup.filter(p => p.id != product.id); //conserve dans le panier uniquement les produits dont l'id n'est pas l'id du produit sur lequel l'user a cliqué, ainsi l'id selectionné sera supprimé
-    
-    localStorage.setItem("product", JSON.stringify(recup)); //enregistre le nouveau panier
-}
-paragrapheDelete.addEventListener('click', function(){
-    removeFromBasket(paragrapheDelete);
-})*/
