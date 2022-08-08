@@ -91,7 +91,6 @@ divIcone.appendChild(quantityInCard);
 divIcone.appendChild(iconeKanap);
 divIcone.style.alignSelf = 'center';
 divIcone.style.alignItems = 'center';
-divIcone.style.border = '0.1rem dotted #3498db';
 divIcone.style.borderRadius = '1rem';
 divIcone.style.height = '1.9rem';
 divIcone.style.width = '1.7rem';
@@ -114,9 +113,12 @@ function iconKanapOnCart(){
       quantitiesArrayForIcone.push(eachQuantityLS);
     }
     totalQuantity = quantitiesArrayForIcone.reduce(reducer, 0);
+    quantityInCard.style.display = 'initial';
+    iconeKanap.style.display = 'initial';
+    divIcone.style.border = '0.1rem dotted #3498db';
     divIcone.style.display = 'flex'; 
     quantityInCard.innerHTML = Number(totalQuantity);  
-    iconeKanap.innerHTML = '<svg><path d="M 10.656 4.032 C 10.179 4.032 9.792 4.419 9.792 4.896 V 6.336 H 1.728 V 4.896 C 1.728 4.419 1.3412 4.032 0.864 4.032 S 0 4.419 0 4.896 v 3.456 C 0 8.5104 0.129 8.64 0.288 8.64 h 1.152 c 0.159 0 0.2718 -0.129 0.2718 -0.288 L 1.728 8.064 h 8.064 v 0.288 c 0 0.159 0.129 0.288 0.288 0.288 h 1.152 c 0.159 0 0.288 -0.129 0.288 -0.288 v -3.456 C 11.52 4.419 11.133 4.032 10.656 4.032 z M 2.304 4.896 V 5.76 h 6.912 V 4.896 c 0 -0.6953 0.4955 -1.2771 1.152 -1.4108 V 2.88 c 0 -1.2724 -1.0316 -2.304 -2.304 -2.304 H 3.4398 c -1.2724 0 -2.304 1.0316 -2.304 2.304 L 1.152 3.4848 C 1.809 3.6198 2.304 4.2012 2.304 4.896 z"></path></svg>';
+    iconeKanap.innerHTML = '<svg style="width: 1rem; height: 5rem;"><path d="M 10.656 4.032 C 10.179 4.032 9.792 4.419 9.792 4.896 V 6.336 H 1.728 V 4.896 C 1.728 4.419 1.3412 4.032 0.864 4.032 S 0 4.419 0 4.896 v 3.456 C 0 8.5104 0.129 8.64 0.288 8.64 h 1.152 c 0.159 0 0.2718 -0.129 0.2718 -0.288 L 1.728 8.064 h 8.064 v 0.288 c 0 0.159 0.129 0.288 0.288 0.288 h 1.152 c 0.159 0 0.288 -0.129 0.288 -0.288 v -3.456 C 11.52 4.419 11.133 4.032 10.656 4.032 z M 2.304 4.896 V 5.76 h 6.912 V 4.896 c 0 -0.6953 0.4955 -1.2771 1.152 -1.4108 V 2.88 c 0 -1.2724 -1.0316 -2.304 -2.304 -2.304 H 3.4398 c -1.2724 0 -2.304 1.0316 -2.304 2.304 L 1.152 3.4848 C 1.809 3.6198 2.304 4.2012 2.304 4.896 z"></path></svg>';
        
   }else{
     divIcone.style.display = 'none';
@@ -233,7 +235,7 @@ addButton.addEventListener('click',function(event){
     cart = [];
     cart.push(article);
     productInLocalStorage = cart;
-    notifProductAdded();    
+    notifProductAdded(); 
     iconKanapOnCart();
     return localStorage.setItem("product", JSON.stringify(cart));
   }
