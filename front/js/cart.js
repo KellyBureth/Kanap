@@ -20,14 +20,9 @@ const displayTotalQuantity = document.getElementById('totalQuantity');
 const minValue = 0.9;
 const maxValue = 100;
 
-/*________IF CART IS EMPTY DISPLAYS 0 ARTICLE AND 0 EURO________*/
-if(productInLocalStorage.length == 0){
-  displayTotalPrice.innerHTML = 0;
-  displayTotalQuantity.innerHTML = 0;
-}
 
 /*________TOTAL QUANTITY________*/
-function cartQuantity(){ 
+function calculateAndDisplayTotalQuantity(){ 
   let quantitiesArray = []; //ARRAY OF EACH QUANTITIES
   for(let eachQuantity of productInLocalStorage){
       let eachQuantityLS = parseInt(eachQuantity.quantity); //RETRIEVE ALL THE QUANTITES ON THE LOCAL STORAGE
@@ -38,7 +33,7 @@ function cartQuantity(){
 }
 
 /*________TOTAL PRICE________*/
-function cartPrice(){
+function calculateAndDisplayTotalPrice(){
 let priceArray = []; //ARRAY OF EACH PRICE
   const asyncForPrice = productInLocalStorage.map(async (elt) => {
     const productID = elt.id;
@@ -56,30 +51,34 @@ let priceArray = []; //ARRAY OF EACH PRICE
 
 function removeFromBasket(product){ //DELETE PRODUCT FORM CART
   productInLocalStorage = productInLocalStorage.filter(function (elt) {return elt.color != product.dataset.color || elt.id != product.id} ); //FILTER TO GET THE RIGHT PRODUCT
-  localStorage.setItem("product", JSON.stringify(productInLocalStorage)); //SAVE THE NEW CART
+  savingCart(); 
+}
+
+function savingCart(){
+  localStorage.setItem("product", JSON.stringify(productInLocalStorage));
 }
 
 if(productInLocalStorage){ //IF LOCAL STORAGE IS -NOT- EMPTY
 for(let elt of productInLocalStorage){ //EACH ELEMENT OF LOCAL STORAGE
   id = elt.id;
   
-  cartQuantity(); //CALCULATE AND DISPLAYS TOTAL QUANTITY
-  cartPrice(); //CALCULATE AND DISPLAYS TOTAL PRICE
+  calculateAndDisplayTotalQuantity(); 
+  calculateAndDisplayTotalPrice(); 
 
   /*________REPLACE QUANTITY > 100 BY 100 IN LOCAL STORAGE________*/
   if(elt.quantity > maxValue ){ //IF QUANTITY IS UPPER TO 100 -IN THE LOCAL STORAGE-
     elt.quantity = 100; //REPLACE IT BY 100
-    localStorage.setItem("product", JSON.stringify(productInLocalStorage)); //SAVE CART
-    cartQuantity(); //RECALCULATE AND DISPLAYS TOTAL QUANTITY
-    cartPrice();  //RECALCULATE AND DISPLAYS TOTAL PRICE
+    savingCart(); 
+    calculateAndDisplayTotalQuantity(); 
+    calculateAndDisplayTotalPrice();  
   }
 
   /*________REPLACE QUANTITY < 1 BY 1 IN LOCAL STORAGE________*/
   if(elt.quantity < minValue ){ //IF QUANTITY IS LOWER TO 1
     elt.quantity = 1; //REPLACE IT BY 1
-    localStorage.setItem("product", JSON.stringify(productInLocalStorage)); //SAVE CART
-    cartQuantity(); //RECALCULATE AND DISPLAYS TOTAL QUANTITY
-    cartPrice();  //RECALCULATE AND DISPLAYS TOTAL PRICE
+    savingCart(); 
+    calculateAndDisplayTotalQuantity(); 
+    calculateAndDisplayTotalPrice();  
   }
   
 
@@ -106,43 +105,44 @@ for(let elt of productInLocalStorage){ //EACH ELEMENT OF LOCAL STORAGE
     paragraphePrice.innerHTML = priceProduct + ' €';
     inputQuantity.value = quantity;
 
+    /*________MODIFY QUANTITY VALUE________*/
     for(let btnQuantity of btnQuantities){ //FOR EACH QUANTITY INPUT
       if(btnQuantity.value == elt.quantity ){  //IF CART INPUT QUANTITY = QUANTITY ON LOCAL STORAGE
         btnQuantity.onchange = () => { //IF QUANTITY IS CHANGED
           elt.quantity = Number(btnQuantity.value); //QUANTITY CHANGED ON CART PAGE IS SAVED ON LOCAL STORAGE 
-          localStorage.setItem("product", JSON.stringify(productInLocalStorage)); //SAVE CART
-          cartQuantity(); //RECALCULATE AND DISPLAYS TOTAL QUANTITY
-          cartPrice();//RECALCULATE AND DISPLAYS TOTAL PRICE
+          savingCart(); 
+          calculateAndDisplayTotalQuantity(); 
+          calculateAndDisplayTotalPrice();
   
           /*________ROUND DECIMAL NUMBER________*/
           btnQuantity.value = Math.round(btnQuantity.value); //INPUT QUANTITY ON CART
           elt.quantity = Math.round(btnQuantity.value); // QUANTITY ON  LOCAL STORAGE
-          cartQuantity();//RECALCULATE AND DISPLAYS TOTAL QUANTITY
-          cartPrice();//RECALCULATE AND DISPLAYS TOTAL PRICE
-          localStorage.setItem("product", JSON.stringify(productInLocalStorage));//SAVE CART
+          calculateAndDisplayTotalQuantity();
+          calculateAndDisplayTotalPrice();
+          savingCart();
   
           /*________REPLACE QUANTITY > 100 BY 100 IN QUANTITY INPUT________*/
           if(btnQuantity.value > maxValue ){  //IF QUANTITY INPUT IS UPPER TO 100 -IN CART PAGE-
             btnQuantity.value = 100; //REPLACE IT BY 100
             elt.quantity = 100; //ALSO ON LOCAL STORAGE
-            localStorage.setItem("product", JSON.stringify(productInLocalStorage)); //SAVE CART
-            cartQuantity();//RECALCULATE AND DISPLAYS TOTAL QUANTITY
-            cartPrice();//RECALCULATE AND DISPLAYS TOTAL PRICE
+            savingCart(); 
+            calculateAndDisplayTotalQuantity();
+            calculateAndDisplayTotalPrice();
           }
   
           /*________REPLACE QUANTITY < BY 1 IN QUANTITY INPUT________*/
           if(btnQuantity.value < minValue ){//IF QUANTITY INPUT IS LOWER THAN 1 -IN CART PAGE-
             btnQuantity.value = 1; //CHANGE IT BY 1
             elt.quantity = 1; //ALSO ON LOCAL STORAGE
-            localStorage.setItem("product", JSON.stringify(productInLocalStorage)); //SAVE CART
-            cartQuantity();//RECALCULATE AND DISPLAYS TOTAL QUANTITY
-            cartPrice();//RECALCULATE AND DISPLAYS TOTAL PRICE
+            savingCart(); 
+            calculateAndDisplayTotalQuantity();
+            calculateAndDisplayTotalPrice();
           }
 
         }
       }
 
-/*________WARNING IF QUANITY IS INVALID________*/ 
+      /*________WARNING IF QUANITY IS INVALID________*/ 
       btnQuantity.addEventListener('input', function(){ //ON INPUT (REAL TIME) NOT IN CHANGE
         if(btnQuantity.value > maxValue ){ //IF TOO HIGHT
           newParagraphQuantityNull.style.display = 'none';
@@ -158,13 +158,14 @@ for(let elt of productInLocalStorage){ //EACH ELEMENT OF LOCAL STORAGE
         
         if(btnQuantity.value > minValue && btnQuantity.value < maxValue){ //IF QUANTITY IS VALID : ERASE ERROR MESSAGE
           newParagraphQuantityNull.style.display = 'none';
-          localStorage.setItem("product", JSON.stringify(productInLocalStorage));
+          savingCart();
         }
       }) 
     } //END OF LOOP FOR OF ON LINE 109
     
   }) //END OF 2ND FETCH.THEN
   .catch(error => alert(error))
+  
 
 
   /*________CREATE EACH CARD OF PRODUCT________*/ 
@@ -225,6 +226,7 @@ for(let elt of productInLocalStorage){ //EACH ELEMENT OF LOCAL STORAGE
 
   const btnQuantities = document.querySelectorAll('input.itemQuantity');
 
+
   /*________DELETE BUTTON________*/ 
   const divDelete = document.createElement('div');
   divDelete.classList.add('cart__item__content__settings__delete');
@@ -235,22 +237,24 @@ for(let elt of productInLocalStorage){ //EACH ELEMENT OF LOCAL STORAGE
   divDelete.appendChild(newParagrapheDelete);
 
   let deleteButtons = document.querySelectorAll('p.deleteItem');
+
+
   for(let deleteButton of deleteButtons){   //FOR EACH DELETE BUTTON
       let deleteClosestProduct = deleteButton.closest('article');//SEARCH THE CLOSEST ARTICLE FROM DELETE BUTTON
 
       deleteButton.addEventListener('click', function(){
-          removeFromBasket(deleteClosestProduct);
-          cartQuantity();
-          cartPrice();
-          localStorage.setItem("product", JSON.stringify(productInLocalStorage));
+          removeFromBasket(deleteClosestProduct); //REMOVE FROM LOCAL STORAGE
+          calculateAndDisplayTotalQuantity();
+          calculateAndDisplayTotalPrice();
+          savingCart();
 
-          if(productInLocalStorage.length == 0){
+          if(productInLocalStorage.length == 0){ //IF LOCAL STORAGE IS EMPTY : THE KEY PRODUCT IS NOT HERE
             window.localStorage.removeItem('product');
             displayTotalPrice.innerHTML = 0;
           }
 
         if(elt.id == deleteClosestProduct.id && elt.color == deleteClosestProduct.dataset.color){
-          deleteClosestProduct.remove();//supprime article de la page
+          deleteClosestProduct.remove();  //REMOVE FROM CART PAGE
             }
       }) //fin ecoute deleteButton.addEventListener('click', function(){ l.150
   }//fin for(let deleteButton of deleteButtons){ l.147
@@ -261,7 +265,9 @@ else{ //IF LOCAL STORAGE IS EMPTY : TOTAL QUANTITY AND TOTAL PRICE ARE EQUAL TO 
   displayTotalQuantity.innerHTML = 0;
   displayTotalPrice.innerHTML = 0;
   window.localStorage.removeItem('product');
- }
+}
+
+
 
 
 /*________FORM PART________*/ 
@@ -418,81 +424,10 @@ btnOrder.addEventListener('click', function(e){
       try{
       const contenu = await response.json();
       location.href = 'confirmation.html?orderId=' + contenu.orderId; //REDIRECT TO CONFIRMATION WITH THE ORDER ID WITHOUT STORE IT ON LOCAL STORAGE
-      } catch(e){
-          error => alert(error);
+      } catch(error){
+        submitErrorMessage.innerHTML = "Une erreur s'est produite, veuillez recharger votre page";
       }
     })
 
   }
 })
-
-
-
-
-
-
-//icone kanap
-function iconeQuantity(){  //total quantité
-  let quantitiesArray = [];
-  for(let eachQuantity of productInLocalStorage){
-      let eachQuantityLS = parseInt(eachQuantity.quantity);
-      quantitiesArray.push(eachQuantityLS);
-  }
-  let reducer = (accumulator, currentValue) => accumulator + currentValue;
-  const totalQuantity = quantitiesArray.reduce(reducer, 0);
-  
-  //const displayTotalQuantity = document.getElementById('totalQuantity');
-  displayTotalQuantity.innerHTML = Number(0 + totalQuantity); //avt   displayTotalQuantity.innerHTML = totalQuantity; mais pour avoir 0 si panier vide, addition
-}
-
-const nav = document.querySelector('.limitedWidthBlock nav ul');
-const divIcone = document.createElement('div');
-nav.appendChild(divIcone);
-const quantityInCard = document.createElement('p');
-const iconeKanap = document.createElement('p');
-divIcone.appendChild(quantityInCard);
-divIcone.appendChild(iconeKanap);
-divIcone.style.display = 'flex';
-quantityInCard.innerHTML = Number(totalQuantity);
-//quantityInCard.style.fontSize = 'xl';
-iconeKanap.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" style="font-size: xx-small;"><path d="M592 224C565.5 224 544 245.5 544 272V352H96V272C96 245.5 74.51 224 48 224S0 245.5 0 272v192C0 472.8 7.164 480 16 480h64c8.836 0 15.1-7.164 15.1-16L96 448h448v16c0 8.836 7.164 16 16 16h64c8.836 0 16-7.164 16-16v-192C640 245.5 618.5 224 592 224zM128 272V320h384V272c0-38.63 27.53-70.95 64-78.38V160c0-70.69-57.31-128-128-128H191.1c-70.69 0-128 57.31-128 128L64 193.6C100.5 201.1 128 233.4 128 272z"></path></svg>';
-//iconeKanap.style.fontSize = '3px';
-
-
-//  <div style="/* margin: auto; */position: fixed;top: -40px;right: 10px;/* display: flex; */justify-content: flex-start;align-items: center;">
-//     <p style="
-//     position: relative;
-//     /* font-size: x-large; */
-//     top: 50px;
-// ">totalQuantity</p>
-//     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" style="font-size: xx-small;"><path d="M592 224C565.5 224 544 245.5 544 272V352H96V272C96 245.5 74.51 224 48 224S0 245.5 0 272v192C0 472.8 7.164 480 16 480h64c8.836 0 15.1-7.164 15.1-16L96 448h448v16c0 8.836 7.164 16 16 16h64c8.836 0 16-7.164 16-16v-192C640 245.5 618.5 224 592 224zM128 272V320h384V272c0-38.63 27.53-70.95 64-78.38V160c0-70.69-57.31-128-128-128H191.1c-70.69 0-128 57.31-128 128L64 193.6C100.5 201.1 128 233.4 128 272z"></path></svg>
-// </div>
-// <p style="
-//     position: relative;
-//     /* font-size: x-large; */
-//     top: 50px;
-// ">totalQuantity</p>
-// <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" style="font-size: xx-small;"><path d="M592 224C565.5 224 544 245.5 544 272V352H96V272C96 245.5 74.51 224 48 224S0 245.5 0 272v192C0 472.8 7.164 480 16 480h64c8.836 0 15.1-7.164 15.1-16L96 448h448v16c0 8.836 7.164 16 16 16h64c8.836 0 16-7.164 16-16v-192C640 245.5 618.5 224 592 224zM128 272V320h384V272c0-38.63 27.53-70.95 64-78.38V160c0-70.69-57.31-128-128-128H191.1c-70.69 0-128 57.31-128 128L64 193.6C100.5 201.1 128 233.4 128 272z"></path></svg> 
-
-//div ac 2 p different, 1p xs pour svg et 1 xl pour chiffre
-
-
-
-
-
-//a mettre 
-//  <div style="/* margin: auto; */position: fixed;top: -40px;right: 10px;/* display: flex; */justify-content: flex-start;align-items: center;">
-//     <p style="
-//     position: relative;
-//     /* font-size: x-large; */
-//     top: 50px;
-// ">totalQuantity</p>
-//     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" style="font-size: xx-small;"><path d="M592 224C565.5 224 544 245.5 544 272V352H96V272C96 245.5 74.51 224 48 224S0 245.5 0 272v192C0 472.8 7.164 480 16 480h64c8.836 0 15.1-7.164 15.1-16L96 448h448v16c0 8.836 7.164 16 16 16h64c8.836 0 16-7.164 16-16v-192C640 245.5 618.5 224 592 224zM128 272V320h384V272c0-38.63 27.53-70.95 64-78.38V160c0-70.69-57.31-128-128-128H191.1c-70.69 0-128 57.31-128 128L64 193.6C100.5 201.1 128 233.4 128 272z"></path></svg>
-// </div>
-// <p style="
-//     position: relative;
-//     /* font-size: x-large; */
-//     top: 50px;
-// ">totalQuantity</p>
-// <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" style="font-size: xx-small;"><path d="M592 224C565.5 224 544 245.5 544 272V352H96V272C96 245.5 74.51 224 48 224S0 245.5 0 272v192C0 472.8 7.164 480 16 480h64c8.836 0 15.1-7.164 15.1-16L96 448h448v16c0 8.836 7.164 16 16 16h64c8.836 0 16-7.164 16-16v-192C640 245.5 618.5 224 592 224zM128 272V320h384V272c0-38.63 27.53-70.95 64-78.38V160c0-70.69-57.31-128-128-128H191.1c-70.69 0-128 57.31-128 128L64 193.6C100.5 201.1 128 233.4 128 272z"></path></svg> 
-

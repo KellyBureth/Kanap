@@ -145,7 +145,7 @@ addButton.addEventListener('click',function(event){
   if(colorSelect.selectedIndex != "0" && quantityChoosed > 0 && quantityChoosed < 101){  
    if(productInLocalStorage ){ // IF LOCAL STORAGE IS NOT EMPTY
 
-    const resultFind = productInLocalStorage .find((el) => el.id === id && el.color === colorChoosed); //SEARCH IF PRODUCT IS ON CART
+    const resultFind = productInLocalStorage.find((el) => el.id === id && el.color === colorChoosed); //SEARCH IF PRODUCT IS ON CART
      
     if(resultFind) { //IF THE PRODUCT IS ALREADY ON CART : UPDATE THE QUANTITY
       let quantityInLS = resultFind.quantity;
@@ -170,7 +170,7 @@ addButton.addEventListener('click',function(event){
       }  
 
     }else{ //IF THE PRODUCT IS NOT ON CART : PUSH THE ENTIRE ARTICLE ON CART
-      productInLocalStorage .push(article);
+      productInLocalStorage.push(article);
       notifProductAdded();
       return localStorage.setItem('product', JSON.stringify(productInLocalStorage ));
     }
@@ -178,7 +178,7 @@ addButton.addEventListener('click',function(event){
   }else{ //IF LOCAL STORAGE IS EMPTY : CREATE A NEW ARRAY
     cart = [];
     cart.push(article);
-    productInLocalStorage  = cart;
+    productInLocalStorage = cart;
     notifProductAdded();
     return localStorage.setItem("product", JSON.stringify(cart));
   }
