@@ -1,16 +1,27 @@
 # Kanap #
 
-This is the front end and back end server for Project 5 of the Web Developer path.
+Bienvenue sur mon projet Kanap.
 
-### Back end Prerequisites ###
+Kanap est une entreprise de canapés qui souhaite avoir une plateforme de vente en ligne en plus de sa boutique physique. 
+Le site a été développé dynamiquement en javaScript
 
-You will need to have NodeJS installed locally on your machine.
+Vous trouverez le dossier front et le dossier back dans ce repository.
 
-### Back end Installation ###
 
-Clone the repo on https://github.com/KellyMarieB/Kanap page. From the "back" folder of the project (`cd back`), run `npm install`. You 
-can then run the server with `node server`. 
-The server should run on `localhost` with default port `3000`. If the
-server runs on another port for any reason, this is printed to the
-console when the server starts, e.g. `Listening on port 3001`.
-Finally open the index.html page directly on your browser and enjoy !
+### Prérequis ###
+
+NodeJS doit être installé sur votre machine.
+
+### Installation du backend ###
+
+Clonez le repository https://github.com/KellyMarieB/Kanap. 
+Tapez `cd back` dans le terminal de votre choix puis `npm i` pour installer toutes les dépendances nécessaires.
+Enfin, tapez `node server` pour lancer le serveur backend.
+
+Le serveur se lancera par défault sur le port 3000 (vous pouvez accéder à l'api de l'application à la page http://localhost:3000/), si votre port 3000 est déjà occupé, le serveur de la console (dans votre terminal) vous informera du port utilisé (par exemple : `Listening on port 3001`).
+
+### Lancement du site ###
+Ouvrez à présent la page index.html directement dans le navigateur de votre choix et vous voilà sur le site Kanap !
+
+
+
