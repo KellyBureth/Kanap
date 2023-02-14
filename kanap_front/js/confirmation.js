@@ -6,4 +6,4 @@ const orderId = urlSearch.get('orderId');
 
 /*________DISPLAYS THE ORDER ID________*/ 
 const span = document.getElementById('orderId');
-span.innerHTML = orderId;
+span.textContent = orderId;
